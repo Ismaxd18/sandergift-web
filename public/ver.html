@@ -2,166 +2,73 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SanDerGift | Tu Detalle Especial</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SanDerGift | Una Rosa para Ti</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-        
-        :root {
-            --accent: #ff3366;
-            --accent-gradient: linear-gradient(45deg, #ff3366, #ff8a00);
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: #0f0c29;
-            color: white;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-
-        .container { padding: 25px; width: 90%; max-width: 400px; }
-
-        /* Estilos de la Animación de Carga */
-        #loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Estilos del Contenido del Regalo */
-        #regaloContent { display: none; }
-        
-        .photo-frame {
-            width: 100%; border-radius: 20px;
-            border: 2px solid var(--accent);
-            margin: 20px 0; box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3);
-        }
-
-        h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
-        .message-text { font-size: 16px; line-height: 1.6; opacity: 0.9; }
-
-        /* Estilos para Link Vencido */
-        #expiredContent {
-            display: none;
-            background: rgba(255, 51, 102, 0.1);
-            border: 1px solid var(--accent);
-            padding: 30px;
-            border-radius: 25px;
-        }
-
-        .btn-app {
-            background: var(--accent-gradient);
-            color: white;
-            padding: 15px 25px;
-            text-decoration: none;
-            border-radius: 50px;
-            display: inline-block;
-            margin-top: 20px;
-            font-weight: 800;
-            font-size: 14px;
-            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.4);
-        }
+        body { background: #050505; color: white; font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        .flower { position: relative; }
+        .petal { width: 50px; height: 50px; background: #ff0040; border-radius: 50% 50% 0 50%; position: absolute; transform: rotate(-45deg); box-shadow: 0 0 20px #ff0040; }
+        /* Animación simple de rosa */
+        .stem { width: 8px; height: 150px; background: #006400; margin-top: 40px; border-radius: 5px; }
+        .container { text-align: center; z-index: 10; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 20px; backdrop-filter: blur(10px); }
+        h1 { color: #ff0040; text-shadow: 0 0 10px #ff0040; }
+        #expired { display: none; color: #ff3366; }
     </style>
 </head>
 <body>
+    <div id="loader">Cargando tu detalle... 🌹</div>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p>Abriendo tu sorpresa de SanDerGift...</p>
-    </div>
-
-    <div id="regaloContent" class="container">
-        <h1 id="userName"></h1>
-        <img id="userPhoto" src="" class="photo-frame" style="display:none;">
-        <p id="userMessage" class="message-text"></p>
-        <div style="margin-top: 30px; font-size: 12px; opacity: 0.5;">
-            Generado con SanDerGift ✨
+    <div id="content" style="display:none;">
+        <div class="flower">
+            <div class="petal"></div>
+            <div class="stem"></div>
+        </div>
+        <div class="container">
+            <h1 id="destinatario"></h1>
+            <p id="mensaje"></p>
+            <small id="firma"></small>
         </div>
     </div>
 
-    <div id="expiredContent" class="container">
-        <h2 style="color: var(--accent);">⏳ Link Expirado</h2>
-        <p>Este detalle temporal ha vencido después de 24 horas.</p>
-        <p>¿Quieres crear uno nuevo para esa persona especial?</p>
-        <a href="URL_DE_TU_PLAYSTORE" class="btn-app">INSTALAR SANDERGIFT</a>
+    <div id="expired" class="container">
+        <h1>⏳ Detalle Expirado</h1>
+        <p>Este regalo de 24 horas ha vencido.</p>
+        <button onclick="location.href='https://sandergift.web.app'">Crear uno nuevo</button>
     </div>
 
     <script>
-        // 1. TUS CREDENCIALES OFICIALES
         const firebaseConfig = {
             apiKey: "AIzaSyDjx9vI4LNL9laJ104euQnQSudx2jfQTVs",
             authDomain: "sandergift.firebaseapp.com",
-            projectId: "sandergift",
-            storageBucket: "sandergift.firebasestorage.app",
-            messagingSenderId: "1082598656685",
-            appId: "1:1082598656685:web:84c71bcee34597914cd424",
-            databaseURL: "https://sandergift-default-rtdb.firebaseio.com" 
+            databaseURL: "https://sandergift-default-rtdb.firebaseio.com",
+            projectId: "sandergift"
         };
-
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        // 2. OBTENER ID DE LA URL (Ejemplo: ver.html?id=ABC123)
         const urlParams = new URLSearchParams(window.location.search);
-        const regaloId = urlParams.get('id');
+        const giftId = urlParams.get('id');
 
-        if (regaloId) {
-            // Buscar en la rama "regalos" de tu base de datos
-            database.ref('regalos/' + regaloId).once('value').then((snapshot) => {
+        if(giftId) {
+            db.ref('regalos/' + giftId).once('value', (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById('loader').style.display = 'none';
-
-                if (data) {
+                if(data) {
                     const ahora = Date.now();
-                    const tiempoCreacion = data.timestamp;
-                    const limite = 24 * 60 * 60 * 1000; // Constante de 24 horas
-
-                    // VERIFICACIÓN DE TIEMPO
-                    if (ahora - tiempoCreacion > limite) {
-                        document.getElementById('expiredContent').style.display = 'block';
+                    const limite = 24 * 60 * 60 * 1000; // 24h
+                    if(ahora - data.timestamp > limite) {
+                        document.getElementById('expired').style.display = 'block';
                     } else {
-                        // MOSTRAR DATOS
-                        document.getElementById('regaloContent').style.display = 'block';
-                        document.getElementById('userName').innerText = "De: " + data.remitente + "\nPara: " + data.nombre;
-                        document.getElementById('userMessage').innerText = data.mensaje;
-                        
-                        if(data.foto) {
-                            document.getElementById('userPhoto').src = data.foto;
-                            document.getElementById('userPhoto').style.display = 'block';
-                        }
+                        document.getElementById('content').style.display = 'block';
+                        document.getElementById('destinatario').innerText = "Para: " + data.nombre;
+                        document.getElementById('mensaje').innerText = data.mensaje;
+                        document.getElementById('firma').innerText = "De: " + data.remitente;
                     }
-                } else {
-                    document.body.innerHTML = "<h3>El regalo no existe o fue eliminado. ❌</h3>";
                 }
-            }).catch(error => {
-                console.error("Error de Firebase:", error);
-                document.body.innerHTML = "<h3>Error al conectar con el servidor. 📡</h3>";
             });
-        } else {
-            document.getElementById('loader').innerHTML = "<h3>ID de regalo no detectado. 🎁</h3>";
         }
     </script>
 </body>
-  </html>
-  
+</html>
